@@ -1,0 +1,14 @@
+# Python 3.11+
+numpy>=1.26
+pandas>=2.2
+scipy>=1.11
+statsmodels>=0.14
+scikit-learn>=1.3
+matplotlib>=3.8
+requests>=2.31
+pyyaml>=6.0
+pyarrow>=14.0
+pytest>=7.4
+cryptography>=41.0   # only for authenticated Kalshi requests (public data needs no key)
+# Stage 12 only (optional, large download):
+# torch>=2.2

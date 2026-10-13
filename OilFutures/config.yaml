@@ -1,0 +1,62 @@
+# OilFutures configuration. Every tunable number lives here, never in code.
+# Load it with:  from common.config import load_config;  cfg = load_config()
+
+paths:
+  data_raw: data/raw
+  data_processed: data/processed
+  ledger_db: data/ledger.sqlite
+  events_csv: data/raw/events.csv          # OPEC+/FOMC/EIA dates you maintain by hand
+
+api_keys:
+  # Keys are read from environment variables so they never get committed.
+  eia_env: EIA_API_KEY                     # free: https://www.eia.gov/opendata/register.php
+  fred_env: FRED_API_KEY                   # free: https://fred.stlouisfed.org/docs/api/api_key.html
+  kalshi_key_id_env: KALSHI_KEY_ID         # optional: public market data needs no key
+  kalshi_private_key_path: ~/.kalshi/private_key.pem
+
+kalshi:
+  base_url: https://api.elections.kalshi.com/trade-api/v2
+  # VERIFY on kalshi.com: series tickers seen in the wild. Max/min series unknown; add when found.
+  terminal_series: [KXWTI, KXWTIW]
+  barrier_series: []
+  request_pause_seconds: 0.25
+
+timing:
+  # All timestamps in this project are NAIVE America/New_York wall-clock time.
+  settle_time: "14:30"                     # WTI daily settlement (ET)
+  snapshot_delay_minutes: 5                # start of the clean comparison window after settle
+  snapshot_window_minutes: 30              # length of that window
+  trading_days_per_year: 252
+
+futures:
+  # ICE WTI: last trade = 4th US business day before the 25th of the prior month (NYMEX CL uses 3rd).
+  expiry_business_days_before_25th: 4
+  nymex_expiry_business_days_before_25th: 3   # used to label EIA's NYMEX RCLC1..4 positions
+  # Kalshi switches to the next month this many business days before expiry. VERIFY in contract terms.
+  kalshi_roll_business_days: 2
+  eia_positions: [RCLC1, RCLC2, RCLC3, RCLC4]
+
+backtest:
+  refit_every_days: 20
+  vol_window: 20
+  bootstrap_n: 1000
+  bootstrap_ci: 0.90
+  horizon_buckets_days: [0, 7, 28, 91, 100000]   # 1–7d, 1–4w, 1–3m, 3m+
+  horizon_bucket_labels: ["1-7d", "1-4w", "1-3m", "3m+"]
+  strike_distance_buckets_sd: [0, 0.5, 1.0, 2.0, 100]
+
+trading:
+  bankroll: 1000.0
+  min_edge: 0.03                 # probability points, AFTER fees
+  kelly_fraction: 0.25
+  max_position_frac: 0.02        # max cost of one position / bankroll
+  max_daily_exposure_frac: 0.10  # max total cost of all positions opened per day / bankroll
+  cheap_threshold: 0.15          # contracts priced below this need extra edge
+  cheap_extra_edge: 0.03
+  maker_default: true
+
+fees:
+  # PLACEHOLDERS. Fill from Kalshi's current fee schedule before trusting any P&L.
+  # Kalshi's published form has been: fee = ceil_to_cent(rate * contracts * P * (1 - P)).
+  taker_rate: null
+  maker_rate: null
