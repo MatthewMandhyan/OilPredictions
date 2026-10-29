@@ -104,7 +104,7 @@ def trading_days_until(as_of: pd.Timestamp, settle_date: pd.Timestamp) -> int:
     else:
         first = as_of.normalize()
              # HINT: compare as_of with settle_time(as_of); pd.Timedelta(days=1) moves a day
-    n = ...  # HINT 1: np.busday_count(begin, end, holidays=HOLIDAYS) counts days in [begin, end)
+    n = np.busday_count(first, np.datetime64(settle_date(as_of) + pd.Timedelta(days = 1)), holidays=HOLIDAYS)  # HINT 1: np.busday_count(begin, end, holidays=HOLIDAYS) counts days in [begin, end)
              # HINT 2: that interval is half-open, so to INCLUDE settle_date pass the day after it.
              # SYNTAX: numpy wants dates, not Timestamps: use `.date()` or np.datetime64(...)
 
